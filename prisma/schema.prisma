@@ -1,0 +1,80 @@
+// This is your database schema. Run `npm run prisma:migrate` after editing it.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum FlightType {
+  SOLO
+  DUAL
+  SINGLE_ENGINE
+  MULTI_ENGINE
+  CROSS_COUNTRY
+  NIGHT
+  INSTRUMENT
+}
+
+model Pilot {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+
+  // Flights this pilot logged as pilot-in-command / student
+  flights        Flight[]      @relation("PilotFlights")
+  // Flights this pilot signed off as instructor
+  instructedFlights Flight[]   @relation("InstructorFlights")
+  certifications Certification[]
+}
+
+model Aircraft {
+  id           String   @id @default(uuid())
+  registration String   @unique // e.g. "D-EFGH"
+  type         String   // e.g. "Cessna 172"
+  createdAt    DateTime @default(now())
+
+  flights Flight[]
+}
+
+model Flight {
+  id            String     @id @default(uuid())
+  date          DateTime
+  durationMins  Int
+  type          FlightType
+  remarks       String?
+  createdAt     DateTime   @default(now())
+
+  pilot         Pilot      @relation("PilotFlights", fields: [pilotId], references: [id])
+  pilotId       String
+
+  instructor    Pilot?     @relation("InstructorFlights", fields: [instructorId], references: [id])
+  instructorId  String?
+
+  aircraft      Aircraft   @relation(fields: [aircraftId], references: [id])
+  aircraftId    String
+}
+
+model Certification {
+  id         String   @id @default(uuid())
+  name       String   // e.g. "Night Rating", "Instrument Rating"
+  issuedAt   DateTime
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  pilot      Pilot    @relation(fields: [pilotId], references: [id])
+  pilotId    String
+}
