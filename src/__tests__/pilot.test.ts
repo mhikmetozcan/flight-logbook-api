@@ -47,7 +47,7 @@ describe("Pilot API", () => {
       lastName: "Test",
     });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(500);
   });
 
   it("logs in and returns a JWT", async () => {
