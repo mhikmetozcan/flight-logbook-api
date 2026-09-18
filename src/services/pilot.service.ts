@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import prisma from "../lib/prisma";
 import { ApiError } from "../middleware/errorHandler";
+import { getDurationMins } from "../lib/duration";
 
 export async function createPilot(data: {
   email: string;
@@ -44,18 +45,19 @@ export async function listPilots() {
 
 // This is the kind of business logic that makes the project worth showing:
 // total logged minutes per flight type for a given pilot.
-export async function getPilotHoursSummary(pilotId: string) {
+export async function getPilotHoursSummary(picId: string) {
   const flights = await prisma.flight.findMany({
-    where: { pilotId },
-    select: { durationMins: true, type: true },
+    where: { picId },
+    select: { offblock: true, onblock: true, type: true },
   });
 
   const summary: Record<string, number> = {};
   let totalMins = 0;
 
   for (const flight of flights) {
-    summary[flight.type] = (summary[flight.type] || 0) + flight.durationMins;
-    totalMins += flight.durationMins;
+    const durationMins = getDurationMins(flight.offblock, flight.onblock);
+    summary[flight.type] = (summary[flight.type] || 0) + durationMins;
+    totalMins += durationMins;
   }
 
   return {

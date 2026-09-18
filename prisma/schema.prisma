@@ -51,21 +51,29 @@ model Aircraft {
 }
 
 model Flight {
-  id            String     @id @default(uuid())
-  date          DateTime
-  durationMins  Int
-  type          FlightType
-  remarks       String?
-  createdAt     DateTime   @default(now())
+  id               String     @id @default(uuid())
+  date             DateTime
+  type             FlightType
+  departure        String
+  destination      String
+  offblock         String
+  takeoff          String
+  landing          String
+  onblock          String
+  numberOfLandings Int
+  remarks          String?
+  createdAt        DateTime   @default(now())
 
-  pilot         Pilot      @relation("PilotFlights", fields: [pilotId], references: [id])
-  pilotId       String
+  aircraft         Aircraft   @relation(fields: [aircraftId], references: [id])
+  aircraftId       String
 
-  instructor    Pilot?     @relation("InstructorFlights", fields: [instructorId], references: [id])
-  instructorId  String?
+  pic              Pilot      @relation("PilotFlights", fields: [picId], references: [id])
+  picId            String
 
-  aircraft      Aircraft   @relation(fields: [aircraftId], references: [id])
-  aircraftId    String
+  coPilot          Pilot?     @relation("InstructorFlights", fields: [coPilotId], references: [id])
+  coPilotId        String?
+
+  @@unique([aircraftId, date, offblock])
 }
 
 model Certification {
