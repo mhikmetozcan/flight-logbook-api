@@ -1,4 +1,6 @@
 import { Router } from "express";
+import * as flightController from "../controllers/flight.controller";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -6,7 +8,11 @@ const router = Router();
 //       + pilot.controller.ts + pilot.service.ts:
 //
 //   POST   /api/flights          create a flight log entry
+router.post("/flights", requireAuth, flightController.createFlight);
+
 //   GET    /api/flights/:id      get one flight
+router.get("/:id", requireAuth, flightController.getFlight);
+
 //   GET    /api/flights?pilotId= list flights, filterable by pilot
 //   PATCH  /api/flights/:id      update a flight (instructor sign-off, remarks)
 //   DELETE /api/flights/:id      remove a flight (admin/instructor only)
@@ -17,3 +23,4 @@ const router = Router();
 //   - validation that instructorId is required when type is not SOLO
 
 export default router;
+
