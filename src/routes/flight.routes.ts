@@ -8,7 +8,7 @@ const router = Router();
 //       + pilot.controller.ts + pilot.service.ts:
 //
 //   POST   /api/flights          create a flight log entry
-router.post("/flights", requireAuth, flightController.createFlight);
+router.post("/", requireAuth, flightController.createFlight);
 
 //   GET    /api/flights/:id      get one flight
 router.get("/:id", requireAuth, flightController.getFlight);
