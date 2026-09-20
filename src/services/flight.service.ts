@@ -64,3 +64,48 @@ export async function listFlightsByPilot(picId: string) {
     durationMins: getDurationMins(flight.offblock, flight.onblock),
   }));
 }
+
+export async function listFlightsByCoPilot(coPilotId: string) {
+  const pilot = await prisma.pilot.findUnique({ where: { id: coPilotId } });
+  if (!pilot) throw new ApiError(404, "Pilot not found");
+
+  const flights = await prisma.flight.findMany({ where: { coPilotId } });
+
+  if (flights.length === 0) throw new ApiError(404, "Pilot has no recorded flights");
+
+  return flights.map((flight) => ({
+    ...flight,
+    durationMins: getDurationMins(flight.offblock, flight.onblock),
+  }));
+}
+
+export async function updateFlight(id: string, data: {
+  picId?: string,
+  coPilotId?: string;
+  date?: Date;
+  type?: FlightType;
+  departure?: string;
+  destination?: string;
+  aircraftId?: string;
+  offblock?: string;
+  takeoff?: string;
+  landing?: string;
+  onblock?: string;
+  numberOfLandings?: number;
+}) {
+  let flight = await prisma.flight.findUnique({ where: { id } });
+  if (!flight) throw new ApiError(404, "Flight not found");
+
+  const aircraftId = data.aircraftId ?? flight.aircraftId;
+  const date = data.date ?? flight.date;
+  const offblock = data.offblock ?? flight.offblock;
+
+  const existing = await prisma.flight.findFirst({
+    where: { aircraftId, date, offblock, id: { not: id } },
+  });
+  if (existing) throw new ApiError(409, "A flight with this data already exists");
+
+
+  flight = await prisma.flight.update({ where: { id }, data });
+  return { ...flight, durationMins: getDurationMins(flight.offblock, flight.onblock) };
+}

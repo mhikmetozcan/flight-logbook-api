@@ -22,6 +22,8 @@ const createFlightSchema = z.object({
   numberOfLandings: z.number().int().nonnegative(),
 });
 
+const updateFlightSchema = createFlightSchema.partial();
+
 export async function createFlight(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const data = createFlightSchema.parse(req.body);
@@ -42,6 +44,33 @@ export async function createFlight(req: AuthedRequest, res: Response, next: Next
 export async function getFlight(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const flight = await flightService.getFlightById(req.params.id);
+    res.json(flight);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listFlights(req: AuthedRequest, res: Response, next: NextFunction) {
+  try {
+    if (typeof req.query.picId === "string") {
+      return res.json(await flightService.listFlightsByPilot(req.query.picId));
+    }
+    if (typeof req.query.coPilotId === "string") {
+      return res.json(await flightService.listFlightsByCoPilot(req.query.coPilotId));
+    }
+    res.status(400).json({ error: "picId or coPilotId query param required" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateFlight(req: AuthedRequest, res: Response, next: NextFunction) {
+  try {
+    const data = updateFlightSchema.parse(req.body);
+    if (Object.keys(data).length === 0) throw new ApiError(400, "No fields provided to update");
+    const flightId = req.params.id;
+
+    const flight = await flightService.updateFlight(flightId, data);
     res.json(flight);
   } catch (err) {
     next(err);

@@ -13,8 +13,12 @@ router.post("/", requireAuth, flightController.createFlight);
 //   GET    /api/flights/:id      get one flight
 router.get("/:id", requireAuth, flightController.getFlight);
 
-//   GET    /api/flights?pilotId= list flights, filterable by pilot
+//   GET    /api/flights?picId=      list flights, filterable by pilot
+//   GET    /api/flights?coPilotId=  list flights, filterable by co-pilot
+router.get("/", requireAuth, flightController.listFlights);
+
 //   PATCH  /api/flights/:id      update a flight (instructor sign-off, remarks)
+router.patch("/:id", requireAuth, flightController.updateFlight);
 //   DELETE /api/flights/:id      remove a flight (admin/instructor only)
 //
 // Service-layer logic worth adding once the CRUD works:
