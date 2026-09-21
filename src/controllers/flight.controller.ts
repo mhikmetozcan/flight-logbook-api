@@ -76,3 +76,22 @@ export async function updateFlight(req: AuthedRequest, res: Response, next: Next
     next(err);
   }
 }
+
+
+export async function deleteFlight(req: AuthedRequest, res: Response, next: NextFunction) {
+  try {
+    const flightId = req.params.id;
+    const flight = await flightService.getFlightById(flightId);
+
+    const isPic = req.user!.id === flight.picId;
+    const isAdmin = req.user!.role === "ADMIN";
+    if (!isPic && !isAdmin) {
+      throw new ApiError(403, "Only the pilot in command or an admin can delete this flight");
+    }
+
+    await flightService.deleteFlight(flightId);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}

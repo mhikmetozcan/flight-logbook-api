@@ -19,7 +19,9 @@ router.get("/", requireAuth, flightController.listFlights);
 
 //   PATCH  /api/flights/:id      update a flight (instructor sign-off, remarks)
 router.patch("/:id", requireAuth, flightController.updateFlight);
-//   DELETE /api/flights/:id      remove a flight (admin/instructor only)
+//   DELETE /api/flights/:id      remove a flight (pic or admin only)
+router.delete("/:id", requireAuth, flightController.deleteFlight);
+
 //
 // Service-layer logic worth adding once the CRUD works:
 //   - currency check: "is this pilot current for night flying"
