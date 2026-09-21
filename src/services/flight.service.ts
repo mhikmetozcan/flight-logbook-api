@@ -109,3 +109,10 @@ export async function updateFlight(id: string, data: {
   flight = await prisma.flight.update({ where: { id }, data });
   return { ...flight, durationMins: getDurationMins(flight.offblock, flight.onblock) };
 }
+
+export async function deleteFlight(id: string) {
+  const flight = await prisma.flight.findUnique({ where: { id } });
+  if (!flight) throw new ApiError(404, "Flight not found");
+
+  await prisma.flight.delete({where: { id }});
+}
